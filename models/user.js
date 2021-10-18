@@ -9,7 +9,7 @@ const userSchema = new Schema({
         type: String,
         require: true,
     },
-    contactaNo: {
+    contactNo: {
         type: String,
         required: true,
     },
