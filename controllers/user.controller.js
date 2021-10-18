@@ -7,7 +7,7 @@ exports.postRegister = (req, res, next) => {
     const { name, email, contactNo, password } = req.body;
     User.findOne({ email: email }).then((user) => {
         if (user) {
-            return res.status(200).send({
+            return res.status(400).send({
                 success: false,
                 message: 'email repeated',
             });
