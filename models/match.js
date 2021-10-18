@@ -1,24 +1,7 @@
 const { Schema, model } = require('mongoose');
 
 const MatchSchema = new Schema({
-    team1: {
-        type: String,
-        required: true,
-    },
-    team2: {
-        type: String,
-        required: true,
-    },
-    team1Team: [
-        {
-            playerId: Number,
-        },
-    ],
-    team2Team: [
-        {
-            playerId: Number,
-        },
-    ],
+    title: String,
     predictions: [
         {
             user: {
@@ -37,12 +20,16 @@ const MatchSchema = new Schema({
             ],
         },
     ],
-    status: {
-        type: String,
-        default: 'Not started',
-    },
     venue: String,
     date: Schema.Types.Date,
+    teams: {
+        team1: String,
+        team2: String,
+    },
+    scoreBoard: {
+        type: Schema.Types.ObjectId,
+        ref: 'Scoreboard',
+    },
 });
 
 module.exports = model('Match', MatchSchema);
