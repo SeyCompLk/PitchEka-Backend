@@ -30,6 +30,7 @@ const MatchSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'Scoreboard',
     },
+    overs: Number,
 });
 
 module.exports = model('Match', MatchSchema);
