@@ -10,6 +10,10 @@ const adminSchema = new Schema({
         required: true,
     },
     token: String,
+    verified: {
+        type: Boolean,
+        default: false,
+    },
 });
 
 module.exports = new model('Admin', adminSchema);
