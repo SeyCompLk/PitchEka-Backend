@@ -3,6 +3,8 @@ const router = require('express').Router();
 
 router.post('/login', adminControllers.postLogin);
 
+router.post('/register', adminControllers.postRegister);
+
 router.post('/add-match', adminControllers.postMatch);
 
 router.put('/update-match/:matchId', adminControllers.updateMatch);
