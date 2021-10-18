@@ -1,0 +1,23 @@
+const express = require('express');
+const app = express();
+
+const bodyParser = require('body-parser');
+app.use(bodyParser.json());
+
+const cors = require('cors');
+app.use(cors());
+
+const dotenv = require('dotenv');
+dotenv.config();
+
+const db = require('./utils/db');
+if (process.env.NODE_ENV != 'test') db.connect();
+
+const adminRoutes = require('./routes/admin.routes');
+app.use('/admin', adminRoutes);
+
+const userRoutes = require('./routes/user.routes');
+app.use('/user', userRoutes);
+
+module.exports = app;
+
