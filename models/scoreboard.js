@@ -2,7 +2,11 @@ const { Schema, model } = require('mongoose');
 
 const scoreboardSchema = new Schema({
     inning: 0 || 1 || 2,
-    toss: 0 || 1 || 2,
+    tossWon: 0 || 1 || 2,
+    toss: {
+        team1: 'bat' || 'bowl',
+        team2: 'bat' || 'bowl',
+    },
     teams: {
         team1: [
             {
