@@ -7,8 +7,7 @@ app.use(bodyParser.json());
 const cors = require('cors');
 app.use(cors());
 
-const dotenv = require('dotenv');
-dotenv.config();
+require('dotenv').config();
 
 const db = require('./utils/db');
 if (process.env.NODE_ENV != 'test') db.connect();
@@ -20,4 +19,3 @@ const userRoutes = require('./routes/user.routes');
 app.use('/user', userRoutes);
 
 module.exports = app;
-
