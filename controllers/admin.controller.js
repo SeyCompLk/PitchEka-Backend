@@ -30,6 +30,7 @@ exports.postLogin = (req, res, next) => {
                             res.status(200).send({
                                 success: true,
                                 message: 'User logged in successfully!',
+                                token,
                             });
                         });
                     }
@@ -60,7 +61,7 @@ exports.postRegister = (req, res, next) => {
         }
 
         const token = jwt.sign({ email }, process.env.TOKEN_KEY, {
-            expiresIn: '24h',
+            expiresIn: '48h',
         });
 
         bcrypt.hash(password, 10, (err, newPassword) => {
