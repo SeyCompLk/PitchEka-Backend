@@ -26,7 +26,7 @@ exports.connectMock = (args) => {
                                 user.password = hash;
                             });
                         });
-                        User.insertMany(admins).then(() => {
+                        User.insertMany(users).then(() => {
                             resolve();
                         });
                     }
