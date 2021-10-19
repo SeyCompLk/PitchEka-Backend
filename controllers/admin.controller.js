@@ -147,30 +147,26 @@ exports.updateMatch = (req, res, next) => {
                         selectedTo.team1 === 'bat' ? 1 : 2;
 
                     const team1 = playingTeam.team1.map((player) => {
-                        return { playerId: player._id };
+                        return { playerId: player.playerId };
                     });
                     const team2 = playingTeam.team2.map((player) => {
-                        return { playerId: player._id };
+                        return { playerId: player.playerId };
                     });
                     match.predictions.forEach((item) => {
-                        let correctCount = 0;
-                        item.team1.forEach((prediction) => {
-                            if (team1.includes(prediction)) {
-                                correctCount++;
-                            }
-                        });
-                        item.team2.forEach((prediction) => {
-                            if (team2.includes(prediction)) {
-                                correctCount++;
-                            }
-                        });
-                        if (correctCount == 22) {
-                            item.user.points += 10;
-                        } else if (correctCount >= 19 && correctCount < 22) {
-                            item.user.points += 7;
-                        } else if (correctCount >= 15 && correctCount < 19) {
-                            item.user.points += 5;
-                        }
+                        const results1 = team1.filter(
+                            ({ value: id1 }) =>
+                                !item.team1.some(
+                                    ({ value: id2 }) => id2 === id1
+                                )
+                        );
+                        const results2 = team2.filter(
+                            ({ value: id1 }) =>
+                                !item.team2.some(
+                                    ({ value: id2 }) => id2 === id1
+                                )
+                        );
+                        console.log(results1);
+                        console.log(results2);
                     });
                     match.scoreBoard = scoreBoard;
                     match.isLive = true;
