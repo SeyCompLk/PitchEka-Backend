@@ -12,9 +12,13 @@ exports.postRegister = (req, res, next) => {
                 message: 'email repeated',
             });
         }
-        const token = jwt.sign({ email }, process.env.TOKEN_KEY, {
-            expiresIn: '48h',
-        });
+        const token = jwt.sign(
+            { email, isAdmin: false },
+            process.env.TOKEN_KEY,
+            {
+                expiresIn: '48h',
+            }
+        );
         bcrypt.hash(password, 10, (err, hash) => {
             const newUser = new User({
                 name,
@@ -45,15 +49,23 @@ exports.postLogin = (req, res, next) => {
                         message: 'Invalid password',
                     });
                 } else {
-                    const token = jwt.sign({ email }, process.env.TOKEN_KEY, {
-                        expiresIn: '48h',
-                    });
+                    const token = jwt.sign(
+                        { email, isAdmin: false },
+                        process.env.TOKEN_KEY,
+                        {
+                            expiresIn: '48h',
+                        }
+                    );
                     user.token = token;
 
                     user.save().then(() => {
                         return res.status(200).send({
                             success: true,
                             message: 'User logged in successfully!',
+                            isAdmin: false,
+                            expiresIn: new Date(
+                                new Date().getTime() + 172800000
+                            ).getTime(),
                             token,
                         });
                     });

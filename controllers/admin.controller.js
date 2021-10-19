@@ -18,7 +18,7 @@ exports.postLogin = (req, res, next) => {
                         });
                     } else {
                         const token = jwt.sign(
-                            { email },
+                            { email, isAdmin: true },
                             process.env.TOKEN_KEY,
                             {
                                 expiresIn: '48h',
@@ -31,6 +31,10 @@ exports.postLogin = (req, res, next) => {
                             res.status(200).send({
                                 success: true,
                                 message: 'User logged in successfully!',
+                                isAdmin: true,
+                                expiresIn: new Date(
+                                    new Date().getTime() + 172800000
+                                ).getTime(),
                                 token,
                             });
                         });
@@ -61,9 +65,13 @@ exports.postRegister = (req, res, next) => {
             });
         }
 
-        const token = jwt.sign({ email }, process.env.TOKEN_KEY, {
-            expiresIn: '48h',
-        });
+        const token = jwt.sign(
+            { email, isAdmin: true },
+            process.env.TOKEN_KEY,
+            {
+                expiresIn: '48h',
+            }
+        );
 
         bcrypt.hash(password, 10, (err, newPassword) => {
             const newAdmin = new Admin({
