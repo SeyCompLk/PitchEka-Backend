@@ -10,6 +10,7 @@ const scoreboardSchema = new Schema({
     teams: {
         team1: [
             {
+                playerId: Schema.Types.ObjectId,
                 name: String,
                 imageUrl: String,
                 role: String,
@@ -19,6 +20,7 @@ const scoreboardSchema = new Schema({
         ],
         team2: [
             {
+                playerId: Schema.Types.ObjectId,
                 name: String,
                 imageUrl: String,
                 role: String,

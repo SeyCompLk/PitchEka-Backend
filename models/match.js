@@ -10,12 +10,12 @@ const MatchSchema = new Schema({
             },
             team1: [
                 {
-                    playerId: Number,
+                    playerId: Schema.Types.ObjectId,
                 },
             ],
             team2: [
                 {
-                    playerId: Number,
+                    playerId: Schema.Types.ObjectId,
                 },
             ],
         },
