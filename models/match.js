@@ -50,11 +50,24 @@ const MatchSchema = new Schema({
             ],
         },
     },
+    winPredictions: [
+        {
+            team: Number,
+            user: {
+                type: Schema.Types.ObjectId,
+                ref: 'User',
+            },
+        },
+    ],
     scoreBoard: {
         type: Schema.Types.ObjectId,
         ref: 'Scoreboard',
     },
     overs: Number,
+    isLive: {
+        type: Boolean,
+        default: false,
+    },
 });
 
 module.exports = model('Match', MatchSchema);
