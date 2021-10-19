@@ -1,8 +1,8 @@
 const { Schema, model } = require('mongoose');
 
 const scoreboardSchema = new Schema({
-    inning: Number, // 0 || 1 || 2
-    tossWon: Number, // 0 || 1 || 2
+    inning: { type: Number, default: 0 }, // 0 || 1 || 2
+    tossWon: { type: Number, default: 0 }, // 0 || 1 || 2
     toss: {
         team1: String, // 'bat' || 'bowl'
         team2: String,
