@@ -193,11 +193,59 @@ exports.updateScore = (req, res, next) => {
 
         socket.on(
             'score-admin',
-            ({ matchId, runs, isIllegal, isRotated, isOut }) => {
-                socket
-                    .to(matchId)
-                    .emit('score-pdate', { runs, isIllegal, isRotated, isOut });
-                //database work
+            ({ matchId, runs, isIllegal, isRotated, isOut, nextBatsman }) => {
+                socket.to(matchId).emit('score-update', {
+                    runs,
+                    isIllegal,
+                    isRotated,
+                    isOut,
+                    nextBatsman,
+                });
+                Match.findById(matchId).then((result) => {
+                    const { scoreBoard, overs } = result;
+                    let totRuns =
+                        scoreBoard.scores['team' + scoreBoard.inning]
+                            .totalScore + runs;
+                    if (isOut) {
+                        scoreBoard.batsman.striker = nextBatsman;
+                    }
+                    if (isRotated) {
+                        const temp = scoreBoard.batsman.striker;
+                        scoreBoard.batsman.striker =
+                            scoreBoard.batsman.nonStriker;
+                        scoreBoard.batsman.nonStriker = temp;
+                    }
+                    if (isIllegal) {
+                        totRuns += 1;
+                    } else {
+                        if (scoreBoard.bowls == 5) {
+                            scoreBoard.bowls = 0;
+                            scoreBoard.overs += 1;
+                        } else {
+                            scoreBoard.bowls += 1;
+                        }
+
+                        if (scoreBoard.overs == overs) {
+                            if (scoreBoard.inning == 1) {
+                                // reset score board to initial and inning = 2
+                                // break the flow with return
+                            } else {
+                                // done and select wimPredictors
+                            }
+                            return;
+                        } else if (scoreBoard.bowls == 0) {
+                            const temp = scoreBoard.batsman.striker;
+                            scoreBoard.batsman.striker =
+                                scoreBoard.batsman.nonStriker;
+                            scoreBoard.batsman.nonStriker = temp;
+                        }
+                    }
+                    scoreBoard.scores['team' + scoreBoard.inning] = totRuns;
+                    result.scoreBoard = scoreBoard;
+                    return result.save().then(() => {
+                        console.log('Match updated');
+                    });
+                });
             }
         );
     });
