@@ -23,8 +23,32 @@ const MatchSchema = new Schema({
     venue: String,
     date: Schema.Types.Date,
     teams: {
-        team1: String,
-        team2: String,
+        team1: {
+            country: String,
+            flag: String,
+            squad: [
+                {
+                    name: String,
+                    imageUrl: String,
+                    role: String,
+                    battingArm: String,
+                    bowlingArm: String,
+                },
+            ],
+        },
+        team2: {
+            country: String,
+            flag: String,
+            squad: [
+                {
+                    name: String,
+                    imageUrl: String,
+                    role: String,
+                    battingArm: String,
+                    bowlingArm: String,
+                },
+            ],
+        },
     },
     scoreBoard: {
         type: Schema.Types.ObjectId,

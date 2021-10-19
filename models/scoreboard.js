@@ -1,11 +1,11 @@
 const { Schema, model } = require('mongoose');
 
 const scoreboardSchema = new Schema({
-    inning: 0 || 1 || 2,
-    tossWon: 0 || 1 || 2,
+    inning: Number, // 0 || 1 || 2
+    tossWon: Number, // 0 || 1 || 2
     toss: {
-        team1: 'bat' || 'bowl',
-        team2: 'bat' || 'bowl',
+        team1: String, // 'bat' || 'bowl'
+        team2: String,
     },
     teams: {
         team1: [
@@ -13,8 +13,8 @@ const scoreboardSchema = new Schema({
                 name: String,
                 imageUrl: String,
                 role: String,
-                battingArm: 'right' || 'left',
-                bowlingArm: 'right' || 'left',
+                battingArm: String, // 'right' || 'left'
+                bowlingArm: String,
             },
         ],
         team2: [
@@ -22,21 +22,21 @@ const scoreboardSchema = new Schema({
                 name: String,
                 imageUrl: String,
                 role: String,
-                battingArm: 'right' || 'left',
-                bowlingArm: 'right' || 'left',
+                battingArm: String,
+                bowlingArm: String,
             },
         ],
     },
     scores: {
         inn1: {
-            battingTeam: 0 || 1 || 2,
-            bowlingTeam: 0 || 1 || 2,
+            battingTeam: Number, // 0 || 1 || 2
+            bowlingTeam: Number,
             bat: [],
             bowl: [],
         },
         inn2: {
-            battingTeam: 0 || 1 || 2,
-            bowlingTeam: 0 || 1 || 2,
+            battingTeam: Number, // 0 || 1 || 2
+            bowlingTeam: Number, // 0 || 1 || 2
             bat: [
                 {
                     name: String,
