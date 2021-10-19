@@ -33,8 +33,24 @@ const scoreboardSchema = new Schema({
         inn1: {
             battingTeam: Number, // 0 || 1 || 2
             bowlingTeam: Number,
-            bat: [],
-            bowl: [],
+            bat: [
+                {
+                    name: String,
+                    status: String,
+                    score: Number,
+                    bowlsFaced: Number,
+                },
+            ],
+            bowl: [
+                {
+                    name: String,
+                    status: String,
+                    score: Number,
+                    bowlsFaced: Number,
+                },
+            ],
+            totalScore: Number,
+            wickets: Number,
         },
         inn2: {
             battingTeam: Number, // 0 || 1 || 2
@@ -55,6 +71,8 @@ const scoreboardSchema = new Schema({
                     wickets: Number,
                 },
             ],
+            totalScore: Number,
+            wickets: Number,
         },
     },
     batsman: {
