@@ -130,7 +130,7 @@ exports.updateMatch = (req, res, next) => {
                 matchId,
             });
             Match.findById(matchId)
-                .populate('scoreBoard')
+                .populate('scoreBoard predictions.user')
                 .then((match) => {
                     const { scoreBoard } = match;
                     scoreBoard.inning = 1;
@@ -146,7 +146,34 @@ exports.updateMatch = (req, res, next) => {
                     scoreBoard.scores.inn2.bowlingTeam =
                         selectedTo.team1 === 'bat' ? 1 : 2;
 
+                    const team1 = playingTeam.team1.map((player) => {
+                        return { playerId: player._id };
+                    });
+                    const team2 = playingTeam.team2.map((player) => {
+                        return { playerId: player._id };
+                    });
+                    match.predictions.forEach((item) => {
+                        let correctCount = 0;
+                        item.team1.forEach((prediction) => {
+                            if (team1.includes(prediction)) {
+                                correctCount++;
+                            }
+                        });
+                        item.team2.forEach((prediction) => {
+                            if (team2.includes(prediction)) {
+                                correctCount++;
+                            }
+                        });
+                        if (correctCount == 22) {
+                            item.user.points += 10;
+                        } else if (correctCount > 19 && correctCount < 22) {
+                            item.user.points += 7;
+                        } else if (correctCount > 15 && correctCount < 19) {
+                            item.user.points += 5;
+                        }
+                    });
                     match.scoreBoard = scoreBoard;
+                    match.isLive = true;
                     match.save();
                 })
                 .catch(console.log);
