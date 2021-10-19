@@ -82,6 +82,8 @@ exports.postLogin = (req, res, next) => {
 
 exports.postPrediction = (req, res, next) => {};
 
+exports.postVote = (req, res, next) => {};
+
 exports.postComment = (req, res, next) => {};
 
 exports.getMatches = (req, res, next) => {};

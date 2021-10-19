@@ -6,7 +6,9 @@ router.post('/login', userControllers.postLogin);
 
 router.post('/register', userControllers.postRegister);
 
-router.post('/predict', verifyUser, userControllers.postPrediction);
+router.post('/predictTeam', verifyUser, userControllers.postPrediction);
+
+router.post('/predictWinner', verifyUser, userControllers.postVote);
 
 router.post('/comment', verifyUser, userControllers.postComment);
 
