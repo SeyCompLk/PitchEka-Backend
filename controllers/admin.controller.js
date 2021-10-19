@@ -1,5 +1,6 @@
 const Admin = require('../models/admin');
 const Match = require('../models/match');
+const Scoreboard = require('../models/scoreboard');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 
@@ -82,9 +83,76 @@ exports.postRegister = (req, res, next) => {
     });
 };
 
-exports.postMatch = (req, res, next) => {};
+exports.postMatch = (req, res, next) => {
+    // title
+    // venue
+    // date
+    // squads
+    // overs
+    // create a score board
+    // innings - 0
+    // tosswon - 0
+    // tossteam
+    // teams - will be updated in the squad
+    const { title, venue, date, squads, overs } = req.body;
 
-exports.updateMatch = (req, res, next) => {};
+    const newScoreboard = new Scoreboard();
+
+    newScoreboard
+        .save()
+        .then((response) => {
+            console.log(response);
+            const newMatch = new Match({
+                title,
+                venue,
+                date,
+                teams: squads,
+                overs,
+                scoreBoard: response._id,
+            });
+            newMatch.save().then(() => {
+                res.status(200).send({
+                    success: true,
+                    message: 'Match created successfully',
+                });
+            });
+        })
+        .catch(console.log);
+};
+
+exports.updateMatch = (req, res, next) => {
+    req.io.on('connection', (socket) => {
+        socket.on('toss', ({ teamWon, selectedTo, playingTeam, matchId }) => {
+            socket.to(matchId).emit('toss-update', {
+                teamWon,
+                selectedTo,
+                playingTeam,
+                matchId,
+            });
+            Match.findById(matchId)
+                .populate('scoreBoard')
+                .then((match) => {
+                    const { scoreBoard } = match;
+                    scoreBoard.inning = 1;
+                    scoreBoard.tossWon = teamWon[teamWon.length - 1];
+                    scoreBoard.toss = selectedTo;
+                    scoreBoard.teams = playingTeam;
+                    scoreBoard.scores.inn1.battingTeam =
+                        selectedTo.team1 === 'bat' ? 1 : 2;
+                    scoreBoard.scores.inn1.bowlingTeam =
+                        selectedTo.team1 === 'bat' ? 2 : 1;
+                    scoreBoard.scores.inn2.battingTeam =
+                        selectedTo.team1 === 'bat' ? 2 : 1;
+                    scoreBoard.scores.inn2.bowlingTeam =
+                        selectedTo.team1 === 'bat' ? 1 : 2;
+
+                    match.scoreBoard = scoreBoard;
+                    match.save();
+                })
+                .catch(console.log);
+        });
+    });
+};
 
 exports.updateScore = (req, res, next) => {
     req.io.on('connection', (socket) => {
@@ -104,6 +172,15 @@ exports.updateScore = (req, res, next) => {
     });
 };
 
-exports.getMatches = (req, res, next) => {};
+exports.getMatches = (req, res, next) => {
+    Match.find().then((result) => {
+        res.status(200).send(result);
+    });
+};
 
-exports.getSingleMatch = (req, res, next) => {};
+exports.getSingleMatch = (req, res, next) => {
+    const matchId = req.params.matchId;
+    Match.findById(matchId).then((match) => {
+        res.status(200).send(match);
+    });
+};
