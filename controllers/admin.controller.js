@@ -166,9 +166,9 @@ exports.updateMatch = (req, res, next) => {
                         });
                         if (correctCount == 22) {
                             item.user.points += 10;
-                        } else if (correctCount > 19 && correctCount < 22) {
+                        } else if (correctCount >= 19 && correctCount < 22) {
                             item.user.points += 7;
-                        } else if (correctCount > 15 && correctCount < 19) {
+                        } else if (correctCount >= 15 && correctCount < 19) {
                             item.user.points += 5;
                         }
                     });
