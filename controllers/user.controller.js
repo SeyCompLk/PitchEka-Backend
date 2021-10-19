@@ -38,31 +38,33 @@ exports.postLogin = (req, res, next) => {
     const { email, password } = req.body;
     User.findOne({ email: email }).then((user) => {
         if (user) {
-            bcrypt.compar(password, user.password, (err, result) => {
+            bcrypt.compare(password, user.password, (err, result) => {
                 if (!result) {
-                    return res.status(400).send({
+                    res.status(400).send({
                         success: false,
                         message: 'Invalid password',
                     });
-                }
-                const token = jwt.sign({ email }, process.env.TOKEN_KEY, {
-                    expiresIn: '48h',
-                });
-                user.token = token;
-
-                user.save().then(() => {
-                    return res.status(200).send({
-                        success: true,
-                        message: 'User logged in successfully!',
-                        token,
+                } else {
+                    const token = jwt.sign({ email }, process.env.TOKEN_KEY, {
+                        expiresIn: '48h',
                     });
-                });
+                    user.token = token;
+
+                    user.save().then(() => {
+                        return res.status(200).send({
+                            success: true,
+                            message: 'User logged in successfully!',
+                            token,
+                        });
+                    });
+                }
+            });
+        } else {
+            res.status(400).send({
+                success: false,
+                message: 'Invalid email',
             });
         }
-        return res.status(400).send({
-            success: false,
-            message: 'Invalid email',
-        });
     });
 };
 
