@@ -194,13 +194,6 @@ exports.updateScore = (req, res, next) => {
         socket.on(
             'score-admin',
             ({ matchId, runs, isIllegal, isRotated, isOut, nextBatsman }) => {
-                socket.to(matchId).emit('score-update', {
-                    runs,
-                    isIllegal,
-                    isRotated,
-                    isOut,
-                    nextBatsman,
-                });
                 Match.findById(matchId).then((result) => {
                     const { scoreBoard, overs } = result;
                     const inning = scoreBoard.inning;
