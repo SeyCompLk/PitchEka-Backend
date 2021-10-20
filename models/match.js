@@ -59,6 +59,7 @@ const MatchSchema = new Schema({
             },
         },
     ],
+    winner: Number,
     scoreBoard: {
         type: Schema.Types.ObjectId,
         ref: 'Scoreboard',
