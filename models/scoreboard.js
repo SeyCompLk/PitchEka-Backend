@@ -51,6 +51,14 @@ const scoreboardSchema = new Schema({
             ],
             totalScore: Number,
             wickets: Number,
+            overs: {
+                type: Number,
+                default: 0,
+            },
+            bowls: {
+                type: Number,
+                default: 0,
+            },
         },
         inn2: {
             battingTeam: Number, // 0 || 1 || 2
@@ -73,6 +81,14 @@ const scoreboardSchema = new Schema({
             ],
             totalScore: Number,
             wickets: Number,
+            overs: {
+                type: Number,
+                default: 0,
+            },
+            bowls: {
+                type: Number,
+                default: 0,
+            },
         },
     },
     batsman: {
@@ -92,14 +108,6 @@ const scoreboardSchema = new Schema({
         overs: Number,
         bowls: Number,
         wickets: Number,
-    },
-    overs: {
-        type: Number,
-        default: 0,
-    },
-    bowls: {
-        type: Number,
-        default: 0,
     },
 });
 
