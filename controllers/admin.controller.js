@@ -203,9 +203,9 @@ exports.updateScore = (req, res, next) => {
                 });
                 Match.findById(matchId).then((result) => {
                     const { scoreBoard, overs } = result;
+                    const inning = scoreBoard.inning;
                     let totRuns =
-                        scoreBoard.scores['team' + scoreBoard.inning]
-                            .totalScore + runs;
+                        scoreBoard.scores['team' + inning].totalScore + runs;
                     if (isOut) {
                         scoreBoard.batsman.striker = nextBatsman;
                     }
@@ -218,19 +218,28 @@ exports.updateScore = (req, res, next) => {
                     if (isIllegal) {
                         totRuns += 1;
                     } else {
-                        if (scoreBoard.bowls == 5) {
-                            scoreBoard.bowls = 0;
-                            scoreBoard.overs += 1;
+                        if (scoreBoard.scores['team' + inning].bowls == 5) {
+                            scoreBoard.scores['team' + inning].bowls = 0;
+                            scoreBoard.scores['team' + inning].overs += 1;
                         } else {
-                            scoreBoard.bowls += 1;
+                            scoreBoard.scores['team' + inning].bowls += 1;
                         }
 
-                        if (scoreBoard.overs == overs) {
+                        if (scoreBoard.scores['team' + inning].overs == overs) {
                             if (scoreBoard.inning == 1) {
                                 // reset score board to initial and inning = 2
+                                scoreBoard.inning = 2;
                                 // break the flow with return
                             } else {
                                 // done and select wimPredictors
+                                if (
+                                    scoreBoard.inning['team1'].totalScore >
+                                    scoreBoard.inning['team2'].totalScore
+                                ) {
+                                    result.winner = 1;
+                                } else {
+                                    result.winner = 2;
+                                }
                             }
                             return;
                         } else if (scoreBoard.bowls == 0) {
