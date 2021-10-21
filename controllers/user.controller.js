@@ -86,6 +86,19 @@ exports.postVote = (req, res, next) => {};
 
 exports.postComment = (req, res, next) => {};
 
-exports.getMatches = (req, res, next) => {};
+exports.getMatches = (req, res, next) => {
+    Match.find({})
+        .then((result) => {
+            res.status(200).send(result);
+        })
+        .catch(console.log);
+};
 
-exports.getMatch = (req, res, next) => {};
+exports.getMatch = (req, res, next) => {
+    const matchId = req.params.matchId;
+    Match.findById(matchId)
+        .then((result) => {
+            res.status(200).send(result);
+        })
+        .catch(console.log);
+};
