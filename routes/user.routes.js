@@ -12,8 +12,12 @@ router.post('/predictWinner', verifyUser, userControllers.postVote);
 
 router.post('/comment', verifyUser, userControllers.postComment);
 
-router.post('/matches', userControllers.getMatches);
+router.get('/matches', verifyUser, userControllers.getMatchesWithoutVoting);
 
-router.post('/matches/:matchId', userControllers.getMatch);
+router.get(
+    '/matches/:matchId',
+    verifyUser,
+    userControllers.getMatchWithoutVoting
+);
 
 module.exports = router;
