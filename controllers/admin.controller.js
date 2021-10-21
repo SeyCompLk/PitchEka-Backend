@@ -18,7 +18,7 @@ exports.postLogin = (req, res, next) => {
                         });
                     } else {
                         const token = jwt.sign(
-                            { email, isAdmin: true, verified: false },
+                            { email, isAdmin: true, verified: user.verified },
                             process.env.TOKEN_KEY,
                             {
                                 expiresIn: '48h',
@@ -66,7 +66,7 @@ exports.postRegister = (req, res, next) => {
         }
 
         const token = jwt.sign(
-            { email, isAdmin: true, verified: user.verified },
+            { email, isAdmin: true, verified: false },
             process.env.TOKEN_KEY,
             {
                 expiresIn: '48h',
