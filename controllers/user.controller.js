@@ -3,6 +3,9 @@ const Match = require('../models/match');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 
+// user - eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InNoYWt5YWltYW5qaXRoMzJAZ21haWwuY29tIiwiaXNBZG1pbiI6ZmFsc2UsImlhdCI6MTYzNDgyMzM0MiwiZXhwIjoxNjM0OTk2MTQyfQ._qTH8xfWEM4TS2JioIsv-cIY97-ZFw-cLkuwujaYAHM
+// admin - eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InNoYWt5YWltYW5qaXRoMzJAZ21haWwuY29tIiwiaXNBZG1pbiI6dHJ1ZSwiaWF0IjoxNjM0ODIzNTc4LCJleHAiOjE2MzQ5OTYzNzh9.0OyJNjs7NDfYlK8DugnTMQAzlIOhIQuuzZNLnWoMH0s
+
 exports.postRegister = (req, res, next) => {
     const { name, email, contactNo, password } = req.body;
     User.findOne({ email: email }).then((user) => {
@@ -80,25 +83,112 @@ exports.postLogin = (req, res, next) => {
     });
 };
 
-exports.postPrediction = (req, res, next) => {};
-
-exports.postVote = (req, res, next) => {};
-
-exports.postComment = (req, res, next) => {};
-
-exports.getMatches = (req, res, next) => {
-    Match.find({})
+exports.postPrediction = (req, res, next) => {
+    const { matchId, team1, team2 } = req.body;
+    Match.findById(matchId)
+        .populate('predictions.user')
         .then((result) => {
-            res.status(200).send(result);
+            const voted = result.predictions.find((prediction) => {
+                return prediction.user.email === req.user;
+            });
+            if (!result.scoreBoard.inning == 0 || result.isLive) {
+                return res.status(400).send({
+                    success: false,
+                    message: 'Match already started',
+                });
+            }
+            if (voted) {
+                return res.status(400).send({
+                    success: false,
+                    message: 'User already voted',
+                });
+            }
+            User.findOne({ email: req.user }).then((user) => {
+                result.predictions.push({ user: user._id, team1, team2 });
+                result.save().then(() => {
+                    res.status(200).send({
+                        success: true,
+                        message: 'Prediction updated successfully',
+                    });
+                });
+            });
         })
         .catch(console.log);
 };
 
-exports.getMatch = (req, res, next) => {
+exports.postVote = (req, res, next) => {
+    const { matchId, team } = req.body;
+    Match.findById(matchId)
+        .populate('winPredictions.user')
+        .then((result) => {
+            const voted = result.winPredictions.find((prediction) => {
+                return prediction.user.email === req.user;
+            });
+            if (!result.scoreBoard.inning == 1 || !result.isLive) {
+                return res.status(400).send({
+                    success: false,
+                    message: 'Match has not started yet',
+                });
+            }
+            if (voted) {
+                return res.status(400).send({
+                    success: false,
+                    message: 'User already voted for a winner',
+                });
+            }
+            User.findOne({ email: req.user }).then((user) => {
+                result.winPredictions.push({ user: user._id, team });
+                result.save().then(() => {
+                    res.status(200).send({
+                        success: true,
+                        message: 'Winner prediction updated successfully',
+                    });
+                });
+            });
+        });
+};
+
+exports.postComment = (req, res, next) => {};
+
+exports.getMatchesWithoutVoting = (req, res, next) => {
+    Match.find({})
+        .populate('predictions.user')
+        .populate('winPredictions.user')
+        .then((result) => {
+            const finRes = result.map((single) => {
+                const voted = single.predictions.find((prediction) => {
+                    return prediction.user.email === req.user;
+                });
+                const winnerVoted = single.winPredictions.find((prediction) => {
+                    return prediction.user.email === req.user;
+                });
+                return {
+                    teamsVoted: !req.verified || voted ? true : false,
+                    winnerVoted: !req.verified || winnerVoted ? true : false,
+                    matchData: single,
+                };
+            });
+            res.status(200).send(finRes);
+        })
+        .catch(console.log);
+};
+
+exports.getMatchWithoutVoting = (req, res, next) => {
     const matchId = req.params.matchId;
     Match.findById(matchId)
+        .populate('predictions.user')
         .then((result) => {
-            res.status(200).send(result);
+            const voted = result.predictions.find((prediction) => {
+                return prediction.user.email === req.user;
+            });
+            const winnerVoted = result.winPredictions.find((prediction) => {
+                return prediction.user.email === req.user;
+            });
+            res.status(200).send({
+                voted: !req.verified || voted ? true : false,
+                winnerVoted: !req.verified || winnerVoted ? true : false,
+                matchData: result,
+            });
         })
         .catch(console.log);
 };
