@@ -147,7 +147,7 @@ exports.postVote = (req, res, next) => {
 
 exports.postComment = (req, res, next) => {
     req.socket.on('message', ({ matchId, message }) => {
-        req.to(matchId).emit(message);
+        req.socket.to(matchId).emit(message);
     });
 };
 
