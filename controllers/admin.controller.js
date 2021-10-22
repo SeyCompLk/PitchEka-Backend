@@ -189,13 +189,22 @@ exports.updateMatch = (req, res, next) => {
 exports.updateScore = (req, res, next) => {
     req.socket.on(
         'score-admin',
-        ({ matchId, runs, isIllegal, isRotated, isOut, nextBatsman }) => {
+        ({
+            matchId,
+            runs,
+            isIllegal,
+            isRotated,
+            isOut,
+            nextBatsman,
+            isRunOut,
+        }) => {
             req.socket.to(matchId).emit('score-update', {
                 runs,
                 isIllegal,
                 isRotated,
                 isOut,
                 nextBatsman,
+                isRunOut,
             });
             Match.findById(matchId).then((result) => {
                 const { scoreBoard, overs } = result;
@@ -203,7 +212,11 @@ exports.updateScore = (req, res, next) => {
                 let totRuns =
                     scoreBoard.scores['team' + inning].totalScore + runs;
                 if (isOut) {
-                    scoreBoard.batsman.striker = nextBatsman;
+                    if (isRunOut) {
+                        scoreBoard.batsman.nonStriker = nextBatsman;
+                    } else {
+                        scoreBoard.batsman.striker = nextBatsman;
+                    }
                 }
                 if (isRotated) {
                     const temp = scoreBoard.batsman.striker;
