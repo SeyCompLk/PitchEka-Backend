@@ -129,9 +129,10 @@ exports.postMatch = (req, res, next) => {
 };
 
 exports.updateMatch = (req, res, next) => {
-    req.io.on('connection', (socket) => {
-        socket.on('toss', ({ teamWon, selectedTo, playingTeam, matchId }) => {
-            socket.to(matchId).emit('toss-update', {
+    req.socket.on(
+        'toss-admin',
+        ({ teamWon, selectedTo, playingTeam, matchId }) => {
+            req.socket.to(matchId).emit('toss-update', {
                 teamWon,
                 selectedTo,
                 playingTeam,
@@ -181,83 +182,76 @@ exports.updateMatch = (req, res, next) => {
                     match.save();
                 })
                 .catch(console.log);
-        });
-    });
+        }
+    );
 };
 
 exports.updateScore = (req, res, next) => {
-    req.io.on('connection', (socket) => {
-        socket.on('join_room', ({ roomId }) => {
-            socket.join(roomId);
-        });
-
-        socket.on(
-            'score-admin',
-            ({ matchId, runs, isIllegal, isRotated, isOut, nextBatsman }) => {
-                socket.to(matchId).emit('score-update', {
-                    runs,
-                    isIllegal,
-                    isRotated,
-                    isOut,
-                    nextBatsman,
-                });
-                Match.findById(matchId).then((result) => {
-                    const { scoreBoard, overs } = result;
-                    const inning = scoreBoard.inning;
-                    let totRuns =
-                        scoreBoard.scores['team' + inning].totalScore + runs;
-                    if (isOut) {
-                        scoreBoard.batsman.striker = nextBatsman;
+    req.socket.on(
+        'score-admin',
+        ({ matchId, runs, isIllegal, isRotated, isOut, nextBatsman }) => {
+            req.socket.to(matchId).emit('score-update', {
+                runs,
+                isIllegal,
+                isRotated,
+                isOut,
+                nextBatsman,
+            });
+            Match.findById(matchId).then((result) => {
+                const { scoreBoard, overs } = result;
+                const inning = scoreBoard.inning;
+                let totRuns =
+                    scoreBoard.scores['team' + inning].totalScore + runs;
+                if (isOut) {
+                    scoreBoard.batsman.striker = nextBatsman;
+                }
+                if (isRotated) {
+                    const temp = scoreBoard.batsman.striker;
+                    scoreBoard.batsman.striker = scoreBoard.batsman.nonStriker;
+                    scoreBoard.batsman.nonStriker = temp;
+                }
+                if (isIllegal) {
+                    totRuns += 1;
+                } else {
+                    if (scoreBoard.scores['team' + inning].bowls == 5) {
+                        scoreBoard.scores['team' + inning].bowls = 0;
+                        scoreBoard.scores['team' + inning].overs += 1;
+                    } else {
+                        scoreBoard.scores['team' + inning].bowls += 1;
                     }
-                    if (isRotated) {
+
+                    if (scoreBoard.scores['team' + inning].overs == overs) {
+                        if (scoreBoard.inning == 1) {
+                            // reset score board to initial and inning = 2
+                            scoreBoard.inning = 2;
+                            // break the flow with return
+                        } else {
+                            // done and select wimPredictors
+                            if (
+                                scoreBoard.inning['team1'].totalScore >
+                                scoreBoard.inning['team2'].totalScore
+                            ) {
+                                result.winner = 1;
+                            } else {
+                                result.winner = 2;
+                            }
+                        }
+                        return;
+                    } else if (scoreBoard.bowls == 0) {
                         const temp = scoreBoard.batsman.striker;
                         scoreBoard.batsman.striker =
                             scoreBoard.batsman.nonStriker;
                         scoreBoard.batsman.nonStriker = temp;
                     }
-                    if (isIllegal) {
-                        totRuns += 1;
-                    } else {
-                        if (scoreBoard.scores['team' + inning].bowls == 5) {
-                            scoreBoard.scores['team' + inning].bowls = 0;
-                            scoreBoard.scores['team' + inning].overs += 1;
-                        } else {
-                            scoreBoard.scores['team' + inning].bowls += 1;
-                        }
-
-                        if (scoreBoard.scores['team' + inning].overs == overs) {
-                            if (scoreBoard.inning == 1) {
-                                // reset score board to initial and inning = 2
-                                scoreBoard.inning = 2;
-                                // break the flow with return
-                            } else {
-                                // done and select wimPredictors
-                                if (
-                                    scoreBoard.inning['team1'].totalScore >
-                                    scoreBoard.inning['team2'].totalScore
-                                ) {
-                                    result.winner = 1;
-                                } else {
-                                    result.winner = 2;
-                                }
-                            }
-                            return;
-                        } else if (scoreBoard.bowls == 0) {
-                            const temp = scoreBoard.batsman.striker;
-                            scoreBoard.batsman.striker =
-                                scoreBoard.batsman.nonStriker;
-                            scoreBoard.batsman.nonStriker = temp;
-                        }
-                    }
-                    scoreBoard.scores['team' + scoreBoard.inning] = totRuns;
-                    result.scoreBoard = scoreBoard;
-                    return result.save().then(() => {
-                        console.log('Match updated');
-                    });
+                }
+                scoreBoard.scores['team' + scoreBoard.inning] = totRuns;
+                result.scoreBoard = scoreBoard;
+                return result.save().then(() => {
+                    console.log('Match updated');
                 });
-            }
-        );
-    });
+            });
+        }
+    );
 };
 
 exports.getMatches = (req, res, next) => {

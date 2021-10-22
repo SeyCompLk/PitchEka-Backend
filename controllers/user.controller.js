@@ -3,9 +3,6 @@ const Match = require('../models/match');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 
-// user - eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InNoYWt5YWltYW5qaXRoMzJAZ21haWwuY29tIiwiaXNBZG1pbiI6ZmFsc2UsImlhdCI6MTYzNDgyMzM0MiwiZXhwIjoxNjM0OTk2MTQyfQ._qTH8xfWEM4TS2JioIsv-cIY97-ZFw-cLkuwujaYAHM
-// admin - eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InNoYWt5YWltYW5qaXRoMzJAZ21haWwuY29tIiwiaXNBZG1pbiI6dHJ1ZSwiaWF0IjoxNjM0ODIzNTc4LCJleHAiOjE2MzQ5OTYzNzh9.0OyJNjs7NDfYlK8DugnTMQAzlIOhIQuuzZNLnWoMH0s
-
 exports.postRegister = (req, res, next) => {
     const { name, email, contactNo, password } = req.body;
     User.findOne({ email: email }).then((user) => {
@@ -148,7 +145,11 @@ exports.postVote = (req, res, next) => {
         });
 };
 
-exports.postComment = (req, res, next) => {};
+exports.postComment = (req, res, next) => {
+    req.socket.on('message', ({ matchId, message }) => {
+        req.to(matchId).emit(message);
+    });
+};
 
 exports.getMatchesWithoutVoting = (req, res, next) => {
     Match.find({})

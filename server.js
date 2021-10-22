@@ -10,6 +10,11 @@ const { Server } = require('socket.io');
 const io = new Server(server);
 
 app.use((req, res, next) => {
-    req.io = io;
-    next();
+    io.on('connection', (socket) => {
+        socket.on('join-room', ({ matchId }) => {
+            socket.join(matchId);
+        });
+        req.socket = socket;
+        next();
+    });
 });
