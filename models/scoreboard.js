@@ -44,9 +44,8 @@ const scoreboardSchema = new Schema({
             bowl: [
                 {
                     name: String,
-                    status: String,
-                    score: Number,
-                    bowlsFaced: Number,
+                    overs: Number,
+                    wickets: Number,
                 },
             ],
             totalScore: Number,
