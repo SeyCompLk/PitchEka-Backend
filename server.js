@@ -1,3 +1,4 @@
+
 const app = require('./app');
 
 const PORT = process.env.PORT || 8000;
@@ -11,10 +12,12 @@ const io = new Server(server);
 
 app.use((req, res, next) => {
     io.on('connection', (socket) => {
-        socket.on('join-room', ({ matchId }) => {
-            socket.join(matchId);
+        console.log('connected...');
+        socket.on('join-room', (data) => {
+            socket.join(data.matchId);
+            console.log(data);
         });
         req.socket = socket;
-        next();
     });
+    next();
 });
