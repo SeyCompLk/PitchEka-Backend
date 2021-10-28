@@ -1,5 +1,6 @@
 const User = require('../models/user');
 const Match = require('../models/match');
+const Leaderboard = require('../models/leaderboard');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 
@@ -147,7 +148,8 @@ exports.postVote = (req, res, next) => {
 
 exports.postComment = (req, res, next) => {
     req.socket.on('message', ({ matchId, message }) => {
-        req.socket.to(matchId).emit(message);
+        console.log(message);
+        req.socket.to(matchId).emit('message', { message });
     });
 };
 
@@ -192,4 +194,28 @@ exports.getMatchWithoutVoting = (req, res, next) => {
             });
         })
         .catch(console.log);
+};
+
+exports.getLeaderboard = (req, res, next) => {
+    User.find({}).then((result) => {
+        const currLeaderboard = result
+            .map((person) => {
+                return { name: person.name, points: person.points };
+            })
+            .sort((a, b) => a.points - b.points);
+
+        Leaderboard.find({}).then((leaders) => {
+            const finLeaderboard = leaders.sort(
+                (a, b) =>
+                    new Date().getTime() -
+                    b.date -
+                    (new Date().getTime() - a.date)
+            );
+
+            res.status(200).send({
+                curr: currLeaderboard,
+                past: finLeaderboard,
+            });
+        });
+    });
 };
