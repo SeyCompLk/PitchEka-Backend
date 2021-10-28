@@ -20,4 +20,6 @@ router.get(
     userControllers.getMatchWithoutVoting
 );
 
+router.get('/leaders', verifyUser, userControllers.getLeaderboard);
+
 module.exports = router;
