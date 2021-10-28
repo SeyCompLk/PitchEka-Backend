@@ -204,18 +204,29 @@ exports.getLeaderboard = (req, res, next) => {
             })
             .sort((a, b) => a.points - b.points);
 
-        Leaderboard.find({}).then((leaders) => {
-            const finLeaderboard = leaders.sort(
-                (a, b) =>
-                    new Date().getTime() -
-                    b.date -
-                    (new Date().getTime() - a.date)
-            );
+        Leaderboard.find({})
+            .populate('playerData.user')
+            .then((leaders) => {
+                const finLeaderboard = leaders
+                    .map((p) => {
+                        return {
+                            date: p.date,
+                            players: p.playerDaplayerData.map((i) => {
+                                return { name: i.user.name, points: i.score };
+                            }),
+                        };
+                    })
+                    .sort(
+                        (a, b) =>
+                            new Date().getTime() -
+                            b.date -
+                            (new Date().getTime() - a.date)
+                    );
 
-            res.status(200).send({
-                curr: currLeaderboard,
-                past: finLeaderboard,
+                res.status(200).send({
+                    curr: currLeaderboard,
+                    past: finLeaderboard,
+                });
             });
-        });
     });
 };
